@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyDescriptionAttribute(("Optimizely Performance ServiceBus - unified assembly for CMS 11/12/13 variants (u" +
     "se conditional compilation symbols CMS11, CMS12, or CMS13)"))]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d8953a11a8ec8dc753d22ebf7c92bbea2b50a525")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+94337761864fea9210c127bc2bda9c95c7bc0adb")]
 [assembly: System.Reflection.AssemblyProductAttribute("Optimizely.Performance.ServiceBus")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Optimizely.Performance.ServiceBus")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
