@@ -25,3 +25,17 @@ C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus
 C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\obj\Debug\net472\Optimizely.Performance.ServiceBus.pdb
 C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\Microsoft.Extensions.Options.dll
 C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\Microsoft.Extensions.Primitives.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\EPiServer.ApplicationModules.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\EPiServer.Data.Cache.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\EPiServer.Data.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\EPiServer.Events.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\EPiServer.Framework.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\EPiServer.Licensing.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\System.ComponentModel.Annotations.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\System.Data.SqlClient.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\System.Security.AccessControl.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\System.Security.Cryptography.Xml.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\System.Security.Permissions.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\System.Security.Principal.Windows.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\System.Threading.AccessControl.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\System.ValueTuple.dll

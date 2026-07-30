@@ -14,15 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Variant-specific package references can be added/conditioned by the consuming build environment.
-         Consumers should set the CMS11 | CMS12 | CMS13 symbol when building this project to include the
-         appropriate implementation variant. -->
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.5" Condition=" '$(CMS13)' == 'true' Or '$(DefineConstants)' == '*CMS13*' " />
-    <PackageReference Include="WindowsAzure.ServiceBus" Version="7.0.1" Condition=" '$(CMS12)' == 'true' Or '$(DefineConstants)' == '*CMS12*' " />
-    <PackageReference Include="EPiServer.CMS.Core" Version="13.7.0" Condition=" '$(CMS13)' == 'true' Or '$(DefineConstants)' == '*CMS13*' " />
-    <PackageReference Include="EPiServer.Framework" Version="13.7.0" Condition=" '$(CMS13)' == 'true' Or '$(DefineConstants)' == '*CMS13*' " />
-    <PackageReference Include="EPiServer.CMS.Core" Version="12.31.3" Condition=" '$(CMS12)' == 'true' Or '$(DefineConstants)' == '*CMS12*' " />
-    <PackageReference Include="EPiServer.Framework" Version="12.31.3" Condition=" '$(CMS12)' == 'true' Or '$(DefineConstants)' == '*CMS12*' " />
+    <!-- EPiServer.Framework reference - version depends on target framework -->
+    <PackageReference Include="EPiServer.Framework" Version="11.20.14" Condition="'$(TargetFramework)' == 'net472'" />
+    <PackageReference Include="EPiServer.Framework" Version="12.24.1" Condition="'$(TargetFramework)' == 'net6.0'" />
+
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />

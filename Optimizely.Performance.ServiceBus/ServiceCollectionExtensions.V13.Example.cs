@@ -1,82 +1,63 @@
-// This file shows the recommended V13+ integration approach using EventProviderOptions.
-// Copy this code to your V13 project's Startup.cs or ServiceCollectionExtensions.
-
-#if EXAMPLE_CODE_V13
-using EPiServer.Events;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Optimizely.Performance.ServiceBus;
-using Optimizely.Performance.ServiceBus.Core;
-
-namespace YourProject
-{
-    /// <summary>
-    /// Example V13+ service registration using EventProviderOptions.
-    /// This is the SIMPLEST and RECOMMENDED approach for CMS 13+.
-    /// </summary>
-    public static class Startup
-    {
-        public static void ConfigureServices(IServiceCollection services)
-        {
-            // V13+ RECOMMENDED: Pass EventProviderOptions.ParameterTypes directly
-            // This is the cleanest approach - no reflection, no assembly scanning
-            services.AddOptiServiceBusPrioritizer(
-                getEventParameterTypes: sp => sp.GetRequiredService<IOptions<EventProviderOptions>>()
-                                                .Value
-                                                .ParameterTypes,
-                configureOptions: options =>
-                {
-                    // Optional: customize priorities
-                    options.Priorities["CartSynchronization"] = "Critical";
-                    options.Priorities["PricingSynchronization"] = "High";
-
-                    // Optional: add namespace mappings
-                    options.NamespaceMappings["YourCustom.Events"] = "ContentSynchronization";
-                });
-
-            // Alternative: Use default configuration with assembly scanning (works but slower)
-            // services.AddOptiServiceBusPrioritizer();
-        }
-    }
-}
-#endif
-
 /*
 =================================================================================================
-V11/V12 USAGE (in consuming project):
+USAGE EXAMPLES - Optimizely Service Bus Message Prioritization
 =================================================================================================
+
+ALL VERSIONS (V11/V12/V13) - AUTOMATIC DETECTION:
+=================================================================================================
+The library automatically detects your Optimizely version:
+- V13+: Uses EventProviderOptions.ParameterTypes (fastest, most accurate)
+- V11/V12: Falls back to assembly scanning
 
 using Microsoft.Extensions.DependencyInjection;
 using Optimizely.Performance.ServiceBus;
 
 public static void ConfigureServices(IServiceCollection services)
 {
-    // V11/V12: Use assembly scanning (no EventProviderOptions available)
+    // Simplest - works for all versions with auto-detection
+    services.AddOptiServiceBusPrioritizer();
+
+    // With custom configuration
     services.AddOptiServiceBusPrioritizer(options =>
     {
         options.Priorities["CartSynchronization"] = "Critical";
-        options.EnableAutoDiscovery = true; // Scans loaded assemblies
+        options.Priorities["PricingSynchronization"] = "High";
+        options.Priorities["ContentSynchronization"] = "Normal";
     });
 }
 
 =================================================================================================
-V13 USAGE (in consuming project):
+ADVANCED - CUSTOM NAMESPACE MAPPINGS:
 =================================================================================================
 
-using EPiServer.Events;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Optimizely.Performance.ServiceBus;
+services.AddOptiServiceBusPrioritizer(options =>
+{
+    // Priority levels
+    options.Priorities["CartSynchronization"] = "Critical";
+
+    // Map custom namespaces to categories
+    options.NamespaceMappings["YourCompany.Commerce.Events"] = "CartSynchronization";
+    options.NamespaceMappings["YourCompany.Catalog.Events"] = "ProductSynchronization";
+
+    // Enable/disable auto-discovery (true by default for V11/V12)
+    options.EnableAutoDiscovery = true;
+});
+
+=================================================================================================
+ADVANCED - PRE-CONFIGURED PRIORITY CONFIGURATION:
+=================================================================================================
+
+using Optimizely.Performance.ServiceBus.Core;
 
 public static void ConfigureServices(IServiceCollection services)
 {
-    // V13: Use EventProviderOptions.ParameterTypes (RECOMMENDED - fastest, most accurate)
-    services.AddOptiServiceBusPrioritizer(
-        sp => sp.GetRequiredService<IOptions<EventProviderOptions>>().Value.ParameterTypes,
-        options =>
-        {
-            options.Priorities["CartSynchronization"] = "Critical";
-        });
+    // Build configuration manually for full control
+    var config = PriorityConfigurationBuilder.Create()
+        .WithCategoryPriority(MessageCategory.CartSynchronization, MessagePriority.Critical)
+        .WithNamespaceMapping("YourCompany.Commerce", MessageCategory.CartSynchronization)
+        .Build();
+
+    services.AddOptiServiceBusPrioritizer(config);
 }
 
 =================================================================================================

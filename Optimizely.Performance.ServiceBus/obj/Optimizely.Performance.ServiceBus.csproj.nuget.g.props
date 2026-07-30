@@ -13,4 +13,10 @@
     <SourceRoot Include="C:\Users\JeFi\.nuget\packages\" />
     <SourceRoot Include="C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net472' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <PkgEPiServer_Framework Condition=" '$(PkgEPiServer_Framework)' == '' ">C:\Users\JeFi\.nuget\packages\episerver.framework\11.20.14</PkgEPiServer_Framework>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <PkgEPiServer_Framework Condition=" '$(PkgEPiServer_Framework)' == '' ">C:\Users\JeFi\.nuget\packages\episerver.framework\12.24.1</PkgEPiServer_Framework>
+  </PropertyGroup>
 </Project>

@@ -12,15 +12,15 @@
         <member name="M:Optimizely.Performance.ServiceBus.ServiceCollectionExtensions.AddOptiServiceBusPrioritizer(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
             Adds Service Bus message prioritization with default configuration.
-            Auto-discovers types from currently loaded Optimizely assemblies.
+            Automatically uses EventProviderOptions.ParameterTypes if available (V13+),
+            otherwise falls back to assembly scanning (V11/V12).
             </summary>
         </member>
         <member name="M:Optimizely.Performance.ServiceBus.ServiceCollectionExtensions.AddOptiServiceBusPrioritizer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions})">
              <summary>
-             Adds Service Bus message prioritization with configuration from appsettings.json.
-             Uses assembly scanning for type discovery (works for V11/V12/V13).
-            
-             For V13+: Use the overload that takes IEnumerable&lt;Type&gt; parameter types for better performance.
+             Adds Service Bus message prioritization with configuration.
+             Automatically uses EventProviderOptions.ParameterTypes if available (V13+),
+             otherwise falls back to assembly scanning (V11/V12).
             
              Example appsettings.json:
              {
@@ -35,17 +35,6 @@
                  }
                }
              }
-             </summary>
-        </member>
-        <member name="M:Optimizely.Performance.ServiceBus.ServiceCollectionExtensions.AddOptiServiceBusPrioritizer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Func{System.IServiceProvider,System.Collections.Generic.IEnumerable{System.Type}},System.Action{Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions})">
-             <summary>
-             Adds Service Bus message prioritization with explicit event parameter types.
-             Recommended for V13+ - pass EventProviderOptions.Value.ParameterTypes directly.
-            
-             Example for V13+:
-               services.AddOptiServiceBusPrioritizer(
-                   sp => sp.GetRequiredService&lt;IOptions&lt;EventProviderOptions&gt;&gt;().Value.ParameterTypes,
-                   options => { ... });
              </summary>
         </member>
         <member name="M:Optimizely.Performance.ServiceBus.ServiceCollectionExtensions.AddOptiServiceBusPrioritizer(Microsoft.Extensions.DependencyInjection.IServiceCollection,Optimizely.Performance.ServiceBus.Core.PriorityConfiguration)">
