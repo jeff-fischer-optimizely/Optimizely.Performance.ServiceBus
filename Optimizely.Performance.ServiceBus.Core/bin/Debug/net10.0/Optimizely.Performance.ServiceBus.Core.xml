@@ -51,6 +51,43 @@
             Auto-registers discovered types with a PriorityConfiguration based on namespace patterns.
             </summary>
         </member>
+        <member name="T:Optimizely.Performance.ServiceBus.Core.EventParameterTypeRegistry">
+            <summary>
+            Simplified registry for event parameter types.
+            For V13+, use EventProviderOptions.ParameterTypes directly.
+            For V11/V12, register types manually or use the static helper methods.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeRegistry.RegisterTypes(System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            Registers event parameter types for classification.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeRegistry.RegisterType(System.Type)">
+            <summary>
+            Registers a single type.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeRegistry.GetTypes">
+            <summary>
+            Gets all registered types.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeRegistry.ApplyTo(Optimizely.Performance.ServiceBus.Core.PriorityConfiguration)">
+            <summary>
+            Auto-registers discovered types with a PriorityConfiguration.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeRegistry.FromParameterTypes(System.Collections.Generic.IEnumerable{System.Type})">
+             <summary>
+             Creates a registry from EventProviderOptions.ParameterTypes (V13+ only).
+             Requires: using EPiServer.Events; using Microsoft.Extensions.Options;
+            
+             Example:
+               var registry = EventParameterTypeRegistry.FromEventProviderOptions(eventProviderOptions.Value);
+               registry.ApplyTo(config);
+             </summary>
+        </member>
         <member name="T:Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions">
              <summary>
              Configuration options for message prioritization.
@@ -173,7 +210,18 @@
         <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.WithAutoDiscovery(System.Reflection.Assembly[])">
             <summary>
             Enables automatic type discovery from the specified assemblies.
+            For V11/V12 - scans assemblies heuristically.
+            For V13+ - prefer using WithEventParameterTypes() with EventProviderOptions.ParameterTypes instead.
             </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.WithEventParameterTypes(System.Collections.Generic.IEnumerable{System.Type})">
+             <summary>
+             Registers event parameter types directly (V13+ recommended approach).
+             Use this with IOptions&lt;EventProviderOptions&gt;.Value.ParameterTypes for best results.
+            
+             Example for V13+:
+               builder.WithEventParameterTypes(eventProviderOptions.Value.ParameterTypes)
+             </summary>
         </member>
         <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.WithNamespaceMapping(System.String,Optimizely.Performance.ServiceBus.Core.MessageCategory)">
             <summary>

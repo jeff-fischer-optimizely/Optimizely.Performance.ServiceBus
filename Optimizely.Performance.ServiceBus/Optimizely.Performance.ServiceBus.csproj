@@ -25,6 +25,7 @@
     <PackageReference Include="EPiServer.Framework" Version="12.31.3" Condition=" '$(CMS12)' == 'true' Or '$(DefineConstants)' == '*CMS12*' " />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>

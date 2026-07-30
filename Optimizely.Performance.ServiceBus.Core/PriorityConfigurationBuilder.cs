@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Optimizely.Performance.ServiceBus.Core
@@ -43,10 +44,29 @@ namespace Optimizely.Performance.ServiceBus.Core
 
         /// <summary>
         /// Enables automatic type discovery from the specified assemblies.
+        /// For V11/V12 - scans assemblies heuristically.
+        /// For V13+ - prefer using WithEventParameterTypes() with EventProviderOptions.ParameterTypes instead.
         /// </summary>
         public PriorityConfigurationBuilder WithAutoDiscovery(params Assembly[] assemblies)
         {
             _assembliesToScan = assemblies ?? throw new ArgumentNullException(nameof(assemblies));
+            return this;
+        }
+
+        /// <summary>
+        /// Registers event parameter types directly (V13+ recommended approach).
+        /// Use this with IOptions&lt;EventProviderOptions&gt;.Value.ParameterTypes for best results.
+        ///
+        /// Example for V13+:
+        ///   builder.WithEventParameterTypes(eventProviderOptions.Value.ParameterTypes)
+        /// </summary>
+        public PriorityConfigurationBuilder WithEventParameterTypes(IEnumerable<Type> parameterTypes)
+        {
+            if (parameterTypes == null)
+                throw new ArgumentNullException(nameof(parameterTypes));
+
+            var registry = EventParameterTypeRegistry.FromParameterTypes(parameterTypes);
+            registry.ApplyTo(_config);
             return this;
         }
 

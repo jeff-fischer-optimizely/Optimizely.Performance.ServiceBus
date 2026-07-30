@@ -23,3 +23,5 @@ C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus
 C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\obj\Debug\net472\Optimizely.Performance.ServiceBus.dll
 C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\obj\Debug\net472\Optimizely.Performance.ServiceBus.xml
 C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\obj\Debug\net472\Optimizely.Performance.ServiceBus.pdb
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\Microsoft.Extensions.Options.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus\bin\Debug\net472\Microsoft.Extensions.Primitives.dll

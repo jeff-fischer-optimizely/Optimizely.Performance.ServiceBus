@@ -18,7 +18,9 @@
         <member name="M:Optimizely.Performance.ServiceBus.ServiceCollectionExtensions.AddOptiServiceBusPrioritizer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions})">
              <summary>
              Adds Service Bus message prioritization with configuration from appsettings.json.
-             Binds "Optimizely:ServiceBus:MessagePrioritization" section.
+            
+             For V13+: Automatically uses EventProviderOptions.ParameterTypes if available.
+             For V11/V12: Falls back to assembly scanning.
             
              Example appsettings.json:
              {
