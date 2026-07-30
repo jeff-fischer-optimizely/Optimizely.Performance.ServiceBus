@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>OptiServiceBusInterceptor Contributors</Authors>
+    <Description>Service Bus message prioritization for Optimizely CMS 12</Description>
+    <PackageTags>Optimizely;CMS12;ServiceBus;Azure;MessagePriority</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- EPiServer/Optimizely CMS references are intentionally omitted from the package
+         to allow building the library without requiring the CMS packages in the
+         consuming environment. The interceptor implementation that depends on
+         Optimizely types is commented out and will be activated by consumers
+         that add the appropriate CMS package references. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptiServiceBusInterceptor.Core\OptiServiceBusInterceptor.Core.csproj" />
+  </ItemGroup>
+
+</Project>

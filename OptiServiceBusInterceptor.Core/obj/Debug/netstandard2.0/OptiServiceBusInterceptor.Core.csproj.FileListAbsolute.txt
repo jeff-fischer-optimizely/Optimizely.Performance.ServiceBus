@@ -1,0 +1,12 @@
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\bin\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.deps.json
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\bin\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\bin\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.pdb
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\bin\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.xml
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\obj\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.csproj.AssemblyReference.cache
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\obj\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\obj\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.AssemblyInfoInputs.cache
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\obj\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.AssemblyInfo.cs
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\obj\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.csproj.CoreCompileInputs.cache
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\obj\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\obj\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.xml
+C:\src\EpiServer\OptiServiceBusInterceptor\src\OptiServiceBusInterceptor.Core\obj\Debug\netstandard2.0\OptiServiceBusInterceptor.Core.pdb

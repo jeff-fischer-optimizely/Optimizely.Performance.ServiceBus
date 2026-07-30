@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>OptiServiceBusPrioritizer Contributors</Authors>
+    <Description>Service Bus message prioritization for Optimizely CMS 13</Description>
+    <PackageTags>Optimizely;CMS13;ServiceBus;Azure;MessagePriority</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Optimizely packages will be referenced by consuming projects -->
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OptiServiceBusInterceptor.Core\OptiServiceBusPrioritizer.Core.csproj" />
+  </ItemGroup>
+
+</Project>
