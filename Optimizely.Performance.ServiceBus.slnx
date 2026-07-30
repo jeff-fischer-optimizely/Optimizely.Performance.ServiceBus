@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Optimizely.Performance.ServiceBus.Core/Optimizely.Performance.ServiceBus.Core.csproj" />
+  <Project Path="Optimizely.Performance.ServiceBus/Optimizely.Performance.ServiceBus.csproj" />
+</Solution>

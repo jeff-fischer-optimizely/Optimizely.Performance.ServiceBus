@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Multi-target to support older frameworks and .NET 6+ if needed. -->
+    <TargetFrameworks>net472;net6.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>Optimizely.Performance Contributors</Authors>
+    <Description>Optimizely Performance ServiceBus - unified assembly for CMS 11/12/13 variants (use conditional compilation symbols CMS11, CMS12, or CMS13)</Description>
+    <PackageTags>Optimizely;Performance;ServiceBus;MessagePriority</PackageTags>
+    <RootNamespace>Optimizely.Performance.ServiceBus</RootNamespace>
+    <PackageId>Optimizely.Performance.ServiceBus</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Variant-specific package references can be added/conditioned by the consuming build environment.
+         Consumers should set the CMS11 | CMS12 | CMS13 symbol when building this project to include the
+         appropriate implementation variant. -->
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.5" Condition=" '$(CMS13)' == 'true' Or '$(DefineConstants)' == '*CMS13*' " />
+    <PackageReference Include="WindowsAzure.ServiceBus" Version="7.0.1" Condition=" '$(CMS12)' == 'true' Or '$(DefineConstants)' == '*CMS12*' " />
+    <PackageReference Include="EPiServer.CMS.Core" Version="13.7.0" Condition=" '$(CMS13)' == 'true' Or '$(DefineConstants)' == '*CMS13*' " />
+    <PackageReference Include="EPiServer.Framework" Version="13.7.0" Condition=" '$(CMS13)' == 'true' Or '$(DefineConstants)' == '*CMS13*' " />
+    <PackageReference Include="EPiServer.CMS.Core" Version="12.31.3" Condition=" '$(CMS12)' == 'true' Or '$(DefineConstants)' == '*CMS12*' " />
+    <PackageReference Include="EPiServer.Framework" Version="12.31.3" Condition=" '$(CMS12)' == 'true' Or '$(DefineConstants)' == '*CMS12*' " />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Optimizely.Performance.ServiceBus.Core\Optimizely.Performance.ServiceBus.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,15 @@
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.csproj.AssemblyReference.cache
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.AssemblyInfoInputs.cache
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.AssemblyInfo.cs
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.csproj.CoreCompileInputs.cache
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.sourcelink.json
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\bin\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.deps.json
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\bin\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\bin\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.pdb
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\bin\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.xml
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\refint\Optimizely.Performance.ServiceBus.Core.dll
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.xml
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\Optimizely.Performance.ServiceBus.Core.pdb
+C:\src\EpiServer\OptiServiceBusInterceptor\src\Optimizely.Performance.ServiceBus.Core\obj\Debug\net10.0\ref\Optimizely.Performance.ServiceBus.Core.dll
