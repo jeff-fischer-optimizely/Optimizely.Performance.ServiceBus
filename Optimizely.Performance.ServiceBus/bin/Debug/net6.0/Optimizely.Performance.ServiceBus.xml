@@ -4,5 +4,42 @@
         <name>Optimizely.Performance.ServiceBus</name>
     </assembly>
     <members>
+        <member name="T:Optimizely.Performance.ServiceBus.ServiceCollectionExtensions">
+            <summary>
+            Extension methods for registering Optimizely Service Bus message prioritization.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.ServiceCollectionExtensions.AddOptiServiceBusPrioritizer(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds Service Bus message prioritization with default configuration.
+            Auto-discovers types from currently loaded Optimizely assemblies.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.ServiceCollectionExtensions.AddOptiServiceBusPrioritizer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions})">
+             <summary>
+             Adds Service Bus message prioritization with configuration from appsettings.json.
+             Binds "Optimizely:ServiceBus:MessagePrioritization" section.
+            
+             Example appsettings.json:
+             {
+               "Optimizely": {
+                 "ServiceBus": {
+                   "MessagePrioritization": {
+                     "Priorities": {
+                       "CartSynchronization": "Critical",
+                       "PricingSynchronization": "High"
+                     }
+                   }
+                 }
+               }
+             }
+             </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.ServiceCollectionExtensions.AddOptiServiceBusPrioritizer(Microsoft.Extensions.DependencyInjection.IServiceCollection,Optimizely.Performance.ServiceBus.Core.PriorityConfiguration)">
+            <summary>
+            Adds Service Bus message prioritization with a pre-configured PriorityConfiguration instance.
+            Useful for advanced scenarios where you want full control over configuration.
+            </summary>
+        </member>
     </members>
 </doc>

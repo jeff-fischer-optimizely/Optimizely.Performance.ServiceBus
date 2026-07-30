@@ -16,11 +16,8 @@ namespace Optimizely.Performance.ServiceBus.Core
             { MessageCategory.Unknown, MessagePriority.Low }
         };
 
-        public List<string> CustomCartMessageTypes { get; set; } = new();
-        public List<string> CustomPricingMessageTypes { get; set; } = new();
-        public List<string> CustomInventoryMessageTypes { get; set; } = new();
-        public List<string> CustomProductMessageTypes { get; set; } = new();
-        public List<string> CustomContentMessageTypes { get; set; } = new();
+        // REMOVED: Custom*MessageTypes string lists
+        // All message classification is now type-based using AddTypeMapping() or AddPredicateMapping()
 
         // Strong-typed mappings registered at runtime by consumers (V11/V12/V13 projects)
         // Use exact Type mappings when you have access to Optimizely/EPiServer types.

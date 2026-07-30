@@ -1,64 +1,23 @@
 using System;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 
 namespace Optimizely.Performance.ServiceBus.Core
 {
+    /// <summary>
+    /// Classifies Optimizely event messages based on their actual System.Type.
+    ///
+    /// IMPORTANT: Optimizely Service Bus messages are EventMessage objects from EPiServer.Events.
+    /// The EventMessage.Parameter property contains the actual event data whose type we classify.
+    ///
+    /// This classifier operates in three modes:
+    /// 1. Exact Type Mappings - Direct Type -> MessageCategory registrations (fastest)
+    /// 2. Predicate Mappings - Functions that inspect types (for namespace/interface patterns)
+    /// 3. Namespace Fallback - Last resort heuristics based on type namespaces
+    /// </summary>
     public class OptimizelyMessageClassifier : IMessageClassifier
     {
         private readonly ILogger<OptimizelyMessageClassifier> _logger;
         private readonly PriorityConfiguration _config;
-
-        private static readonly string[] CartMessageTypes = new[]
-        {
-            "EPiServer.Commerce.Order.CartMessage",
-            "EPiServer.Commerce.Order.WishListMessage",
-            "EPiServer.Commerce.Order.CartItemMessage",
-            "Mediachase.Commerce.Orders.Cart",
-            "Mediachase.Commerce.Orders.ShoppingCart"
-        };
-
-        private static readonly string[] PricingMessageTypes = new[]
-        {
-            "EPiServer.Commerce.Catalog.PriceMessage",
-            "EPiServer.Commerce.Catalog.PriceValueMessage",
-            "Mediachase.Commerce.Catalog.Price",
-            "Mediachase.Commerce.Pricing.CatalogEntryPrice"
-        };
-
-        private static readonly string[] InventoryMessageTypes = new[]
-        {
-            "EPiServer.Commerce.Catalog.InventoryMessage",
-            "Mediachase.Commerce.Inventory.Warehouse",
-            "Mediachase.Commerce.InventoryService.InventoryRecord"
-        };
-
-        private static readonly string[] ProductMessageTypes = new[]
-        {
-            "EPiServer.Commerce.Catalog.CatalogContentMessage",
-            "EPiServer.Commerce.Catalog.ProductMessage",
-            "EPiServer.Commerce.Catalog.VariationMessage",
-            "EPiServer.Commerce.Catalog.BundleMessage",
-            "EPiServer.Commerce.Catalog.PackageMessage",
-            "Mediachase.Commerce.Catalog.Entry",
-            "Mediachase.Commerce.Catalog.CatalogEntry"
-        };
-
-        private static readonly string[] ContentMessageTypes = new[]
-        {
-            "EPiServer.Core.ContentMessage",
-            "EPiServer.Core.PageMessage",
-            "EPiServer.Core.BlockMessage",
-            "EPiServer.ContentMessage",
-            "EPiServer.ChangeNotificationMessage"
-        };
-
-        private static readonly string[] CatalogMessageTypes = new[]
-        {
-            "EPiServer.Commerce.Catalog.CatalogMessage",
-            "EPiServer.Commerce.Catalog.CategoryMessage",
-            "Mediachase.Commerce.Catalog.CatalogNode"
-        };
 
         public OptimizelyMessageClassifier(ILogger<OptimizelyMessageClassifier> logger, PriorityConfiguration configuration)
         {
@@ -66,8 +25,12 @@ namespace Optimizely.Performance.ServiceBus.Core
             _config = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        // Note: string-based classification has been removed. Callers must supply a System.Type.
-
+        /// <summary>
+        /// Classifies a message based on its System.Type.
+        /// </summary>
+        /// <param name="messageType">The actual System.Type of the EventMessage.Parameter</param>
+        /// <param name="messageBody">Optional message body for inspection (not currently used)</param>
+        /// <returns>The classified MessageCategory</returns>
         public MessageCategory ClassifyMessage(System.Type messageType, object? messageBody)
         {
             if (messageType == null)
@@ -76,14 +39,16 @@ namespace Optimizely.Performance.ServiceBus.Core
                 return MessageCategory.Unknown;
             }
 
-            // 1) Exact type mapping registered by consumer
+            // 1) Exact type mapping registered by consumer (fastest path)
             if (_config.TryGetTypeMapping(messageType, out var mappedCategory))
             {
-                _logger.LogDebug("Classified message type '{MessageType}' using TypeMappings as {Category}", messageType.FullName, mappedCategory);
+                _logger.LogDebug("Classified '{MessageType}' via exact type mapping as {Category}",
+                    messageType.FullName, mappedCategory);
                 return mappedCategory;
             }
 
             // 2) Predicate mappings (evaluated in registration order)
+            // These allow flexible rules like "any type in namespace X" or "implements interface Y"
             var (predicates, categories) = _config.GetPredicateMappingsSnapshot();
             for (int i = 0; i < predicates.Length; i++)
             {
@@ -92,114 +57,105 @@ namespace Optimizely.Performance.ServiceBus.Core
                     var predicate = predicates[i];
                     if (predicate(messageType))
                     {
-                        var cat = categories[i];
-                        _logger.LogDebug("Classified message type '{MessageType}' using predicate as {Category}", messageType.FullName, cat);
-                        return cat;
+                        var predicateCategory = categories[i];
+                        _logger.LogDebug("Classified '{MessageType}' via predicate mapping as {Category}",
+                            messageType.FullName, predicateCategory);
+                        return predicateCategory;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Predicate mapping threw for type '{MessageType}'", messageType.FullName);
+                    _logger.LogWarning(ex, "Predicate mapping threw exception for type '{MessageType}'",
+                        messageType.FullName);
                 }
             }
 
-            var fullname = messageType.FullName ?? messageType.Name;
-
-            // 3) Custom configured string matches (registered by consumers)
-            if (_config.CustomCartMessageTypes.Any(s => !string.IsNullOrWhiteSpace(s) && fullname.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0))
+            // 3) Namespace-based fallback heuristics
+            // These are last-resort patterns when no explicit mappings exist
+            var fallbackCategory = ClassifyByNamespace(messageType);
+            if (fallbackCategory != MessageCategory.Unknown)
             {
-                _logger.LogDebug("Classified message type '{MessageType}' as CartSynchronization via CustomCartMessageTypes", fullname);
+                _logger.LogDebug("Classified '{MessageType}' via namespace heuristic as {Category}",
+                    messageType.FullName, fallbackCategory);
+                return fallbackCategory;
+            }
+
+            _logger.LogInformation("Unable to classify message type '{MessageType}', defaulting to Unknown. " +
+                "Consider registering this type explicitly via PriorityConfiguration.AddTypeMapping() or " +
+                "AddPredicateMapping() for better performance.",
+                messageType.FullName);
+
+            return MessageCategory.Unknown;
+        }
+
+        /// <summary>
+        /// Last-resort classification based on namespace patterns.
+        /// This is only used when no explicit type or predicate mappings match.
+        /// </summary>
+        private MessageCategory ClassifyByNamespace(Type messageType)
+        {
+            var ns = messageType.Namespace ?? string.Empty;
+            var name = messageType.Name;
+
+            // Cart / Order events (highest priority)
+            // Examples: EPiServer.Commerce.Order.*, Mediachase.Commerce.Orders.*
+            if (ns.Contains("Commerce.Order", StringComparison.Ordinal) ||
+                (ns.Contains("Commerce", StringComparison.Ordinal) &&
+                 (name.Contains("Cart", StringComparison.Ordinal) ||
+                  name.Contains("Order", StringComparison.Ordinal))))
+            {
                 return MessageCategory.CartSynchronization;
             }
 
-            if (_config.CustomPricingMessageTypes.Any(s => !string.IsNullOrWhiteSpace(s) && fullname.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0))
+            // Pricing events (high priority)
+            // Examples: EPiServer.Commerce.Catalog.Pricing.*, Mediachase.Commerce.Pricing.*
+            if ((ns.Contains("Commerce", StringComparison.Ordinal) && ns.Contains("Pricing", StringComparison.Ordinal)) ||
+                (ns.Contains("Commerce.Catalog", StringComparison.Ordinal) && name.Contains("Price", StringComparison.Ordinal)))
             {
-                _logger.LogDebug("Classified message type '{MessageType}' as PricingSynchronization via CustomPricingMessageTypes", fullname);
                 return MessageCategory.PricingSynchronization;
             }
 
-            if (_config.CustomInventoryMessageTypes.Any(s => !string.IsNullOrWhiteSpace(s) && fullname.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0))
+            // Inventory events (high priority)
+            // Examples: EPiServer.Commerce.Catalog.Inventory.*, Mediachase.Commerce.Inventory.*
+            if ((ns.Contains("Commerce", StringComparison.Ordinal) && ns.Contains("Inventory", StringComparison.Ordinal)) ||
+                name.Contains("Inventory", StringComparison.Ordinal) ||
+                name.Contains("Warehouse", StringComparison.Ordinal))
             {
-                _logger.LogDebug("Classified message type '{MessageType}' as InventorySynchronization via CustomInventoryMessageTypes", fullname);
                 return MessageCategory.InventorySynchronization;
             }
 
-            if (_config.CustomProductMessageTypes.Any(s => !string.IsNullOrWhiteSpace(s) && fullname.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0))
+            // Catalog structure events (catalogs, categories, nodes)
+            // Examples: EPiServer.Commerce.Catalog.CatalogMessage, CategoryMessage
+            if (ns.Contains("Commerce.Catalog", StringComparison.Ordinal) &&
+                (name.Contains("Catalog", StringComparison.Ordinal) ||
+                 name.Contains("Category", StringComparison.Ordinal) ||
+                 name.Contains("Node", StringComparison.Ordinal)))
             {
-                _logger.LogDebug("Classified message type '{MessageType}' as ProductSynchronization via CustomProductMessageTypes", fullname);
+                return MessageCategory.CatalogSynchronization;
+            }
+
+            // Product events (high priority)
+            // Examples: EPiServer.Commerce.Catalog.Product*, Entry*, Variation*
+            if (ns.Contains("Commerce.Catalog", StringComparison.Ordinal) &&
+                (name.Contains("Product", StringComparison.Ordinal) ||
+                 name.Contains("Entry", StringComparison.Ordinal) ||
+                 name.Contains("Variation", StringComparison.Ordinal) ||
+                 name.Contains("Bundle", StringComparison.Ordinal) ||
+                 name.Contains("Package", StringComparison.Ordinal)))
+            {
                 return MessageCategory.ProductSynchronization;
             }
 
-            if (_config.CustomContentMessageTypes.Any(s => !string.IsNullOrWhiteSpace(s) && fullname.IndexOf(s, StringComparison.OrdinalIgnoreCase) >= 0))
+            // Content events (normal priority)
+            // Examples: EPiServer.ContentEventArgs, EPiServer.Core.ContentMessage
+            if (ns.StartsWith("EPiServer", StringComparison.Ordinal) &&
+                (name.Contains("Content", StringComparison.Ordinal) ||
+                 name.Contains("Page", StringComparison.Ordinal) ||
+                 name.Contains("Block", StringComparison.Ordinal)))
             {
-                _logger.LogDebug("Classified message type '{MessageType}' as ContentSynchronization via CustomContentMessageTypes", fullname);
                 return MessageCategory.ContentSynchronization;
             }
 
-            // 4) Fallback to built-in heuristics (string checks)
-            try
-            {
-                // Cart / Order related
-                if (fullname.IndexOf("Commerce.Order", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("Cart", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("ShoppingCart", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    _logger.LogDebug("Classified message type '{MessageType}' as CartSynchronization", fullname);
-                    return MessageCategory.CartSynchronization;
-                }
-
-                // Pricing
-                if (fullname.IndexOf("Catalog.Price", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("Pricing", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("Price", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    _logger.LogDebug("Classified message type '{MessageType}' as PricingSynchronization", fullname);
-                    return MessageCategory.PricingSynchronization;
-                }
-
-                // Inventory
-                if (fullname.IndexOf("Inventory", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("InventoryRecord", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("Warehouse", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    _logger.LogDebug("Classified message type '{MessageType}' as InventorySynchronization", fullname);
-                    return MessageCategory.InventorySynchronization;
-                }
-
-                // Product / Catalog entries
-                if (fullname.IndexOf("Catalog", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("Product", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("CatalogEntry", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    _logger.LogDebug("Classified message type '{MessageType}' as ProductSynchronization", fullname);
-                    return MessageCategory.ProductSynchronization;
-                }
-
-                // Content events
-                if (fullname.IndexOf("ContentEventArgs", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("ContentMessage", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("PageMessage", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("BlockMessage", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    _logger.LogDebug("Classified message type '{MessageType}' as ContentSynchronization", fullname);
-                    return MessageCategory.ContentSynchronization;
-                }
-
-                // Catalog-specific
-                if (fullname.IndexOf("CategoryMessage", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    fullname.IndexOf("CatalogNode", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    _logger.LogDebug("Classified message type '{MessageType}' as CatalogSynchronization", fullname);
-                    return MessageCategory.CatalogSynchronization;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Error classifying message type '{MessageType}', falling back to Unknown", fullname);
-                return MessageCategory.Unknown;
-            }
-
-            _logger.LogWarning("Unable to classify message type '{MessageType}', defaulting to Unknown", fullname);
             return MessageCategory.Unknown;
         }
 

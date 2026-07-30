@@ -4,6 +4,197 @@
         <name>Optimizely.Performance.ServiceBus.Core</name>
     </assembly>
     <members>
+        <member name="T:Optimizely.Performance.ServiceBus.Core.EventParameterTypeDiscovery">
+             <summary>
+             Discovers and catalogs Optimizely event parameter types from loaded assemblies.
+             This utility helps identify which types are actually sent via Service Bus.
+            
+             Usage:
+               var discovery = new EventParameterTypeDiscovery();
+               discovery.ScanAssemblies(AppDomain.CurrentDomain.GetAssemblies());
+               var types = discovery.GetDiscoveredTypes();
+             </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeDiscovery.ScanAssemblies(System.Reflection.Assembly[])">
+            <summary>
+            Scans the provided assemblies for types that are likely to be sent as EventMessage.Parameter.
+            This includes types from known Optimizely namespaces and types marked with serialization attributes.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeDiscovery.ScanOptimizelyAssemblies(System.String[])">
+            <summary>
+            Scans assemblies whose names match the given prefixes (e.g., "EPiServer", "Mediachase").
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeDiscovery.GetDiscoveredTypes">
+            <summary>
+            Returns all discovered types.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeDiscovery.GetTypesByNamespace">
+            <summary>
+            Returns discovered types grouped by namespace.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeDiscovery.GetTypesInNamespace(System.String)">
+            <summary>
+            Returns discovered types filtered by namespace pattern.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeDiscovery.GenerateReport">
+            <summary>
+            Generates a report of discovered types for diagnostics.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.EventParameterTypeDiscovery.AutoRegisterTypes(Optimizely.Performance.ServiceBus.Core.PriorityConfiguration)">
+            <summary>
+            Auto-registers discovered types with a PriorityConfiguration based on namespace patterns.
+            </summary>
+        </member>
+        <member name="T:Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions">
+             <summary>
+             Configuration options for message prioritization.
+             This class is designed to work with Microsoft.Extensions.Configuration
+             for loading from appsettings.json, environment variables, etc.
+            
+             Example appsettings.json:
+             {
+               "Optimizely": {
+                 "ServiceBus": {
+                   "MessagePrioritization": {
+                     "Priorities": {
+                       "CartSynchronization": "Critical",
+                       "PricingSynchronization": "High",
+                       "ContentSynchronization": "Normal"
+                     },
+                     "NamespaceMappings": {
+                       "EPiServer.Commerce.Order": "CartSynchronization",
+                       "EPiServer.Commerce.Catalog.Pricing": "PricingSynchronization"
+                     }
+                   }
+                 }
+               }
+             }
+             </summary>
+        </member>
+        <member name="P:Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions.Priorities">
+            <summary>
+            Priority level assignments for each message category.
+            Key: MessageCategory name (e.g., "CartSynchronization")
+            Value: MessagePriority name (e.g., "Critical", "High", "Normal", "Low")
+            </summary>
+        </member>
+        <member name="P:Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions.NamespaceMappings">
+             <summary>
+             Namespace-to-category mappings for automatic type classification.
+             Key: Namespace prefix or pattern (e.g., "EPiServer.Commerce.Order")
+             Value: MessageCategory name (e.g., "CartSynchronization")
+            
+             These are registered as predicate mappings that check if a type's namespace
+             starts with the specified key.
+             </summary>
+        </member>
+        <member name="P:Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions.TypeMappings">
+             <summary>
+             Fully-qualified type names mapped to specific categories.
+             Key: Full type name (e.g., "EPiServer.Commerce.Order.CartMessage")
+             Value: MessageCategory name (e.g., "CartSynchronization")
+            
+             These provide exact type-to-category mappings that override namespace-based rules.
+             </summary>
+        </member>
+        <member name="P:Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions.EnableAutoDiscovery">
+            <summary>
+            Whether to enable automatic discovery and registration of types from loaded assemblies.
+            Default is true.
+            </summary>
+        </member>
+        <member name="P:Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions.AutoDiscoveryPrefixes">
+            <summary>
+            Assembly name prefixes to scan when EnableAutoDiscovery is true.
+            Defaults to ["EPiServer", "Mediachase", "Optimizely"].
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions.ApplyTo(Optimizely.Performance.ServiceBus.Core.PriorityConfiguration)">
+            <summary>
+            Applies this configuration to a PriorityConfiguration instance.
+            </summary>
+        </member>
+        <member name="T:Optimizely.Performance.ServiceBus.Core.OptimizelyMessageClassifier">
+             <summary>
+             Classifies Optimizely event messages based on their actual System.Type.
+            
+             IMPORTANT: Optimizely Service Bus messages are EventMessage objects from EPiServer.Events.
+             The EventMessage.Parameter property contains the actual event data whose type we classify.
+            
+             This classifier operates in three modes:
+             1. Exact Type Mappings - Direct Type -> MessageCategory registrations (fastest)
+             2. Predicate Mappings - Functions that inspect types (for namespace/interface patterns)
+             3. Namespace Fallback - Last resort heuristics based on type namespaces
+             </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.OptimizelyMessageClassifier.ClassifyMessage(System.Type,System.Object)">
+            <summary>
+            Classifies a message based on its System.Type.
+            </summary>
+            <param name="messageType">The actual System.Type of the EventMessage.Parameter</param>
+            <param name="messageBody">Optional message body for inspection (not currently used)</param>
+            <returns>The classified MessageCategory</returns>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.OptimizelyMessageClassifier.ClassifyByNamespace(System.Type)">
+            <summary>
+            Last-resort classification based on namespace patterns.
+            This is only used when no explicit type or predicate mappings match.
+            </summary>
+        </member>
+        <member name="T:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder">
+             <summary>
+             Fluent builder for creating and configuring PriorityConfiguration instances.
+             Works across .NET Framework 4.72 to .NET 10.
+            
+             Usage:
+               var config = PriorityConfigurationBuilder.Create()
+                   .WithOptions(options)
+                   .WithAutoDiscovery(AppDomain.CurrentDomain.GetAssemblies())
+                   .Build();
+             </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.Create">
+            <summary>
+            Creates a new configuration builder.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.WithOptions(Optimizely.Performance.ServiceBus.Core.MessagePrioritizationOptions)">
+            <summary>
+            Applies configuration from MessagePrioritizationOptions.
+            This is typically loaded from appsettings.json via IOptions.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.WithAutoDiscovery(System.Reflection.Assembly[])">
+            <summary>
+            Enables automatic type discovery from the specified assemblies.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.WithNamespaceMapping(System.String,Optimizely.Performance.ServiceBus.Core.MessageCategory)">
+            <summary>
+            Adds a specific namespace-to-category mapping.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.WithTypeMapping(System.Type,Optimizely.Performance.ServiceBus.Core.MessageCategory)">
+            <summary>
+            Adds a specific type-to-category mapping.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.WithCategoryPriority(Optimizely.Performance.ServiceBus.Core.MessageCategory,Optimizely.Performance.ServiceBus.Core.MessagePriority)">
+            <summary>
+            Sets the priority for a specific category.
+            </summary>
+        </member>
+        <member name="M:Optimizely.Performance.ServiceBus.Core.PriorityConfigurationBuilder.Build">
+            <summary>
+            Builds the final PriorityConfiguration instance.
+            </summary>
+        </member>
         <member name="T:Optimizely.Performance.ServiceBus.Core.TypeMappingGenerator">
              <summary>
              Runtime helper to discover Optimizely/EPiServer types in the current AppDomain
