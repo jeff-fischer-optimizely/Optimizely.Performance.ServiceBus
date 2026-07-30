@@ -1,60 +1,83 @@
 // This file shows the recommended V13+ integration approach using EventProviderOptions.
-// This is example code - do not include in the actual library.
+// Copy this code to your V13 project's Startup.cs or ServiceCollectionExtensions.
 
 #if EXAMPLE_CODE_V13
 using EPiServer.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Optimizely.Performance.ServiceBus;
 using Optimizely.Performance.ServiceBus.Core;
 
-namespace Optimizely.Performance.ServiceBus.Examples
+namespace YourProject
 {
     /// <summary>
     /// Example V13+ service registration using EventProviderOptions.
     /// This is the SIMPLEST and RECOMMENDED approach for CMS 13+.
     /// </summary>
-    public static class V13ServiceCollectionExtensions
+    public static class Startup
     {
-        /// <summary>
-        /// V13+ recommended approach - leverages EventProviderOptions.ParameterTypes.
-        /// This automatically gets all registered event types from Optimizely.
-        /// </summary>
-        public static IServiceCollection AddOptiServiceBusPrioritizerV13(
-            this IServiceCollection services,
-            Action<MessagePrioritizationOptions>? configureOptions = null)
+        public static void ConfigureServices(IServiceCollection services)
         {
-            // Register configuration options
-            var options = new MessagePrioritizationOptions();
-            configureOptions?.Invoke(options);
-
-            // Build PriorityConfiguration using EventProviderOptions
-            services.AddSingleton<PriorityConfiguration>(sp =>
-            {
-                // Get EventProviderOptions from DI - it already contains all registered event types
-                var eventProviderOptions = sp.GetService<IOptions<EventProviderOptions>>();
-
-                var builder = PriorityConfigurationBuilder.Create()
-                    .WithOptions(options);
-
-                // If EventProviderOptions is available, use it (V13+)
-                if (eventProviderOptions?.Value?.ParameterTypes != null)
+            // V13+ RECOMMENDED: Pass EventProviderOptions.ParameterTypes directly
+            // This is the cleanest approach - no reflection, no assembly scanning
+            services.AddOptiServiceBusPrioritizer(
+                getEventParameterTypes: sp => sp.GetRequiredService<IOptions<EventProviderOptions>>()
+                                                .Value
+                                                .ParameterTypes,
+                configureOptions: options =>
                 {
-                    builder.WithEventParameterTypes(eventProviderOptions.Value.ParameterTypes);
-                }
-                else
-                {
-                    // Fallback to assembly scanning (V11/V12)
-                    builder.WithAutoDiscovery(AppDomain.CurrentDomain.GetAssemblies());
-                }
+                    // Optional: customize priorities
+                    options.Priorities["CartSynchronization"] = "Critical";
+                    options.Priorities["PricingSynchronization"] = "High";
 
-                return builder.Build();
-            });
+                    // Optional: add namespace mappings
+                    options.NamespaceMappings["YourCustom.Events"] = "ContentSynchronization";
+                });
 
-            // Register classifier
-            services.AddSingleton<IMessageClassifier, OptimizelyMessageClassifier>();
-
-            return services;
+            // Alternative: Use default configuration with assembly scanning (works but slower)
+            // services.AddOptiServiceBusPrioritizer();
         }
     }
 }
 #endif
+
+/*
+=================================================================================================
+V11/V12 USAGE (in consuming project):
+=================================================================================================
+
+using Microsoft.Extensions.DependencyInjection;
+using Optimizely.Performance.ServiceBus;
+
+public static void ConfigureServices(IServiceCollection services)
+{
+    // V11/V12: Use assembly scanning (no EventProviderOptions available)
+    services.AddOptiServiceBusPrioritizer(options =>
+    {
+        options.Priorities["CartSynchronization"] = "Critical";
+        options.EnableAutoDiscovery = true; // Scans loaded assemblies
+    });
+}
+
+=================================================================================================
+V13 USAGE (in consuming project):
+=================================================================================================
+
+using EPiServer.Events;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Optimizely.Performance.ServiceBus;
+
+public static void ConfigureServices(IServiceCollection services)
+{
+    // V13: Use EventProviderOptions.ParameterTypes (RECOMMENDED - fastest, most accurate)
+    services.AddOptiServiceBusPrioritizer(
+        sp => sp.GetRequiredService<IOptions<EventProviderOptions>>().Value.ParameterTypes,
+        options =>
+        {
+            options.Priorities["CartSynchronization"] = "Critical";
+        });
+}
+
+=================================================================================================
+*/

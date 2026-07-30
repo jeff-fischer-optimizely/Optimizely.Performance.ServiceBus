@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Optimizely.Performance.ServiceBus.Core;
 
@@ -20,9 +21,9 @@ namespace Optimizely.Performance.ServiceBus
 
         /// <summary>
         /// Adds Service Bus message prioritization with configuration from appsettings.json.
+        /// Uses assembly scanning for type discovery (works for V11/V12/V13).
         ///
-        /// For V13+: Automatically uses EventProviderOptions.ParameterTypes if available.
-        /// For V11/V12: Falls back to assembly scanning.
+        /// For V13+: Use the overload that takes IEnumerable&lt;Type&gt; parameter types for better performance.
         ///
         /// Example appsettings.json:
         /// {
@@ -46,61 +47,55 @@ namespace Optimizely.Performance.ServiceBus
             var options = new MessagePrioritizationOptions();
             configureOptions?.Invoke(options);
 
-            // Build PriorityConfiguration with smart version detection
+            // Build PriorityConfiguration using assembly scanning (V11/V12/V13 compatible)
             services.AddSingleton(sp =>
             {
                 var builder = PriorityConfigurationBuilder.Create()
                     .WithOptions(options);
 
-                // Try to use EventProviderOptions if available (V13+)
-                var eventProviderOptionsType = Type.GetType("EPiServer.Events.EventProviderOptions, EPiServer.Framework");
-                if (eventProviderOptionsType != null)
-                {
-                    // V13+ path: Try to get EventProviderOptions from DI
-                    try
-                    {
-                        var optionsType = typeof(Microsoft.Extensions.Options.IOptions<>).MakeGenericType(eventProviderOptionsType);
-                        var eventProviderOptions = sp.GetService(optionsType);
-
-                        if (eventProviderOptions != null)
-                        {
-                            var valueProperty = optionsType.GetProperty("Value");
-                            var eventOptions = valueProperty?.GetValue(eventProviderOptions);
-
-                            if (eventOptions != null)
-                            {
-                                var parameterTypesProperty = eventProviderOptionsType.GetProperty("ParameterTypes");
-                                var parameterTypes = parameterTypesProperty?.GetValue(eventOptions) as System.Collections.IEnumerable;
-
-                                if (parameterTypes != null)
-                                {
-                                    var typeList = new System.Collections.Generic.List<Type>();
-                                    foreach (var item in parameterTypes)
-                                    {
-                                        if (item is Type type)
-                                            typeList.Add(type);
-                                    }
-
-                                    if (typeList.Count > 0)
-                                    {
-                                        builder.WithEventParameterTypes(typeList);
-                                        return builder.Build();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Fall through to V11/V12 approach
-                    }
-                }
-
-                // V11/V12 fallback: Use assembly scanning
                 if (options.EnableAutoDiscovery)
                 {
                     builder.WithAutoDiscovery(AppDomain.CurrentDomain.GetAssemblies());
                 }
+
+                return builder.Build();
+            });
+
+            // Register classifier
+            services.AddSingleton<IMessageClassifier, OptimizelyMessageClassifier>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// Adds Service Bus message prioritization with explicit event parameter types.
+        /// Recommended for V13+ - pass EventProviderOptions.Value.ParameterTypes directly.
+        ///
+        /// Example for V13+:
+        ///   services.AddOptiServiceBusPrioritizer(
+        ///       sp => sp.GetRequiredService&lt;IOptions&lt;EventProviderOptions&gt;&gt;().Value.ParameterTypes,
+        ///       options => { ... });
+        /// </summary>
+        public static IServiceCollection AddOptiServiceBusPrioritizer(
+            this IServiceCollection services,
+            Func<IServiceProvider, IEnumerable<Type>> getEventParameterTypes,
+            Action<MessagePrioritizationOptions>? configureOptions = null)
+        {
+            if (getEventParameterTypes == null)
+                throw new ArgumentNullException(nameof(getEventParameterTypes));
+
+            // Register configuration options
+            var options = new MessagePrioritizationOptions();
+            configureOptions?.Invoke(options);
+
+            // Build PriorityConfiguration using provided types
+            services.AddSingleton(sp =>
+            {
+                var parameterTypes = getEventParameterTypes(sp);
+
+                var builder = PriorityConfigurationBuilder.Create()
+                    .WithOptions(options)
+                    .WithEventParameterTypes(parameterTypes);
 
                 return builder.Build();
             });
